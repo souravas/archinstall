@@ -58,5 +58,9 @@ post_config() {
     fi
   fi
 
+  # Enable fstrim timer for SSD maintenance
+  info "Enabling weekly fstrim timer for SSD maintenance..."
+  sudo systemctl enable fstrim.timer || warn "Failed to enable fstrim.timer"
+
   success "Post-install configuration complete."
 }
