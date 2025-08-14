@@ -2,13 +2,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-NO_ACT=0
-DO_SSH=0
+NO_ACT=0  # single flag: --dry-run / -n
 for arg in "$@"; do
 	case "$arg" in
-		--dry-run|-n) NO_ACT=1; shift ;;
-		--ssh|--with-ssh) DO_SSH=1; shift ;;
-		*) ;; # ignore unknown for now
+		--dry-run|-n) NO_ACT=1 ;;
+		*) ;; # ignore unknown for now (future args could go here)
 	esac
 done
 
@@ -57,13 +55,15 @@ else
 	info "Skipping post_config during dry-run."
 fi
 
-# Optional SSH setup (after git config so email is available)
-if (( DO_SSH )); then
-	if (( NO_ACT )); then
-		info "[dry-run] Skipping ssh key setup."
-	else
+# SSH setup now always runs (after git config so email is available) unless dry-run
+if (( NO_ACT )); then
+	info "[dry-run] Skipping ssh key setup."
+else
+	if [[ -f "${SCRIPT_DIR}/scripts/ssh_setup.sh" ]]; then
 		source "${SCRIPT_DIR}/scripts/ssh_setup.sh"
 		ssh_setup
+	else
+		warn "ssh_setup.sh missing; skipping SSH key creation"
 	fi
 fi
 
