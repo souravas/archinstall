@@ -3,9 +3,11 @@
 set -euo pipefail
 
 NO_ACT=0
+DO_SSH=0
 for arg in "$@"; do
 	case "$arg" in
 		--dry-run|-n) NO_ACT=1; shift ;;
+		--ssh|--with-ssh) DO_SSH=1; shift ;;
 		*) ;; # ignore unknown for now
 	esac
 done
@@ -42,6 +44,16 @@ if ! (( NO_ACT )); then
 	post_config
 else
 	info "Skipping post_config during dry-run."
+fi
+
+# Optional SSH setup (after git config so email is available)
+if (( DO_SSH )); then
+	if (( NO_ACT )); then
+		info "[dry-run] Skipping ssh key setup."
+	else
+		source "${SCRIPT_DIR}/scripts/ssh_setup.sh"
+		ssh_setup
+	fi
 fi
 
 # Verify essential commands are available
