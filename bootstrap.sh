@@ -37,8 +37,12 @@ else
 	fi
 fi
 
-# Run post-install user configs (zsh, starship, ghostty, git, etc.)
-post_config
+# Run post-install user configs (zsh, starship, ghostty, git, etc.) only if not dry-run
+if ! (( NO_ACT )); then
+	post_config
+else
+	info "Skipping post_config during dry-run."
+fi
 
 # Verify essential commands are available
 verify_installation

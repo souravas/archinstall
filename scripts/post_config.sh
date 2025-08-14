@@ -4,129 +4,204 @@
 post_config() {
   info "Post-install configuration..."
 
+  # Determine repo root (bootstrap sets SCRIPT_DIR to repo root already)
+  local REPO_ROOT="${SCRIPT_DIR}"
+  local CFG_DIR="${REPO_ROOT}/configs"
+
+  # Hard skip for dry-run to guarantee zero side-effects
+  if (( NO_ACT )); then
+    info "[dry-run] post_config skipped (no changes)."
+    return 0
+  fi
+
   # Fonts cache (in case fonts were installed)
   if command -v fc-cache >/dev/null 2>&1; then
-    info "Refreshing font cache..."
-    fc-cache -fv || true
+    if (( NO_ACT )); then
+      info "[dry-run] Would refresh font cache (fc-cache -fv)"
+    else
+      info "Refreshing font cache..."
+      fc-cache -fv || true
+    fi
   fi
 
   # Git globals from config files
-  info "Configuring git globals..."
-  git config --global user.name "$(cat "${SCRIPT_DIR}/../configs/git/user.name")"
-  git config --global user.email "$(cat "${SCRIPT_DIR}/../configs/git/user.email")"
-  git config --global core.editor "$(cat "${SCRIPT_DIR}/../configs/git/core.editor")"
+  if [[ -f "${CFG_DIR}/git/user.name" ]]; then
+    if (( NO_ACT )); then
+      info "[dry-run] Would set git user.name/user.email/core.editor from ${CFG_DIR}/git"
+    else
+      info "Configuring git globals..."
+      git config --global user.name  "$(<"${CFG_DIR}/git/user.name")"
+      git config --global user.email "$(<"${CFG_DIR}/git/user.email")"
+      git config --global core.editor "$(<"${CFG_DIR}/git/core.editor")"
+    fi
+  else
+    warn "Git config files missing under ${CFG_DIR}/git (skipping)"
+  fi
 
   # Configure diff-so-fancy if available
   if command -v diff-so-fancy >/dev/null 2>&1; then
-    info "Configuring git to use diff-so-fancy..."
-    git config --global core.pager "diff-so-fancy | less --tabs=4 -RFX"
-    git config --global interactive.diffFilter "diff-so-fancy --patch"
-    git config --global color.ui true
-    git config --global color.diff-highlight.oldNormal "red bold"
-    git config --global color.diff-highlight.oldHighlight "red bold 52"
-    git config --global color.diff-highlight.newNormal "green bold"
-    git config --global color.diff-highlight.newHighlight "green bold 22"
-    git config --global color.diff.meta "11"
-    git config --global color.diff.frag "magenta bold"
-    git config --global color.diff.func "146 bold"
-    git config --global color.diff.commit "yellow bold"
-    git config --global color.diff.old "red bold"
-    git config --global color.diff.new "green bold"
-    git config --global color.diff.whitespace "red reverse"
+    if (( NO_ACT )); then
+      info "[dry-run] Would configure git for diff-so-fancy"
+    else
+      info "Configuring git to use diff-so-fancy..."
+      git config --global core.pager "diff-so-fancy | less --tabs=4 -RFX"
+      git config --global interactive.diffFilter "diff-so-fancy --patch"
+      git config --global color.ui true
+      git config --global color.diff-highlight.oldNormal "red bold"
+      git config --global color.diff-highlight.oldHighlight "red bold 52"
+      git config --global color.diff-highlight.newNormal "green bold"
+      git config --global color.diff-highlight.newHighlight "green bold 22"
+      git config --global color.diff.meta "11"
+      git config --global color.diff.frag "magenta bold"
+      git config --global color.diff.func "146 bold"
+      git config --global color.diff.commit "yellow bold"
+      git config --global color.diff.old "red bold"
+      git config --global color.diff.new "green bold"
+      git config --global color.diff.whitespace "red reverse"
+    fi
   fi
 
   # Ghostty config
-  info "Setting up Ghostty config..."
-  mkdir -p "${HOME}/.config/ghostty"
-  cp "${SCRIPT_DIR}/../configs/ghostty/config" "${HOME}/.config/ghostty/config"
+  if [[ -f "${CFG_DIR}/ghostty/config" ]]; then
+    if (( NO_ACT )); then
+      info "[dry-run] Would install Ghostty config to ~/.config/ghostty/config"
+    else
+      info "Setting up Ghostty config..."
+      mkdir -p "${HOME}/.config/ghostty"
+      cp "${CFG_DIR}/ghostty/config" "${HOME}/.config/ghostty/config"
+    fi
+  else
+    warn "Ghostty config missing at ${CFG_DIR}/ghostty/config"
+  fi
 
   # Fastfetch config
-  info "Setting up Fastfetch config..."
-  mkdir -p "${HOME}/.local/share/fastfetch/images"
-  mkdir -p "${HOME}/.local/share/fastfetch/presets"
-  cp "${SCRIPT_DIR}/../configs/fastfetch/images/"* "${HOME}/.local/share/fastfetch/images/"
-  cp "${SCRIPT_DIR}/../configs/fastfetch/presets/groups.jsonc" "${HOME}/.local/share/fastfetch/presets/groups.jsonc"
-  mkdir -p "${HOME}/.local/bin"
-  cp "${SCRIPT_DIR}/../configs/fastfetch/fastfetch.sh" "${HOME}/.local/bin/fastfetch"
-  chmod +x "${HOME}/.local/bin/fastfetch"
+  if (( NO_ACT )); then
+    info "[dry-run] Would copy Fastfetch images, presets, and script to ~/.local/..."
+  else
+    info "Setting up Fastfetch config..."
+    mkdir -p "${HOME}/.local/share/fastfetch/images" "${HOME}/.local/share/fastfetch/presets"
+    cp "${CFG_DIR}/fastfetch/images/"* "${HOME}/.local/share/fastfetch/images/" 2>/dev/null || true
+    cp "${CFG_DIR}/fastfetch/presets/groups.jsonc" "${HOME}/.local/share/fastfetch/presets/groups.jsonc" 2>/dev/null || true
+    mkdir -p "${HOME}/.local/bin"
+    if [[ -f "${CFG_DIR}/fastfetch/fastfetch.sh" ]]; then
+      cp "${CFG_DIR}/fastfetch/fastfetch.sh" "${HOME}/.local/bin/fastfetch"
+      chmod +x "${HOME}/.local/bin/fastfetch"
+    fi
+  fi
 
   # Starship preset
-  mkdir -p "${HOME}/.config"
   if command -v starship >/dev/null 2>&1; then
-    info "Setting up starship config (catppuccin-powerline)..."
-    starship preset catppuccin-powerline -o "${HOME}/.config/starship.toml" || true
+    if (( NO_ACT )); then
+      info "[dry-run] Would generate starship preset (catppuccin-powerline)"
+    else
+      mkdir -p "${HOME}/.config"
+      info "Setting up starship config (catppuccin-powerline)..."
+      starship preset catppuccin-powerline -o "${HOME}/.config/starship.toml" || true
+    fi
   else
     warn "starship not found; skipping preset."
   fi
 
   # Oh My Zsh (non-interactive)
   if ! [[ -d "${HOME}/.oh-my-zsh" ]]; then
-    info "Installing Oh My Zsh (non-interactive)..."
-    export RUNZSH=no CHSH=no KEEP_ZSHRC=yes
-    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+    if (( NO_ACT )); then
+      info "[dry-run] Would install Oh My Zsh"
+    else
+      info "Installing Oh My Zsh (non-interactive)..."
+      export RUNZSH=no CHSH=no KEEP_ZSHRC=yes
+      sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+    fi
   fi
 
-  # Copy zshrc (backup existing)
-  info "Setting up zsh config..."
-  if [[ -f "${HOME}/.zshrc" ]]; then
-    cp "${HOME}/.zshrc" "${HOME}/.zshrc.backup.$(date +%s)"
+  # zshrc & config files
+  if (( NO_ACT )); then
+    info "[dry-run] Would backup existing .zshrc and copy new one + supporting zsh config files"
+  else
+    info "Setting up zsh config..."
+    if [[ -f "${HOME}/.zshrc" ]]; then
+      cp "${HOME}/.zshrc" "${HOME}/.zshrc.backup.$(date +%s)"
+    fi
+    if [[ -f "${CFG_DIR}/zsh/.zshrc" ]]; then
+      cp "${CFG_DIR}/zsh/.zshrc" "${HOME}/.zshrc"
+    else
+      warn ".zshrc missing at ${CFG_DIR}/zsh/.zshrc"
+    fi
+    info "Setting up zsh config files..."
+    mkdir -p "${HOME}/.config/zsh"
+    cp "${CFG_DIR}/zsh/omz.zsh"       "${HOME}/.config/zsh/omz.zsh"       2>/dev/null || true
+    cp "${CFG_DIR}/zsh/aliases.zsh"   "${HOME}/.config/zsh/aliases.zsh"   2>/dev/null || true
+    cp "${CFG_DIR}/zsh/functions.zsh" "${HOME}/.config/zsh/functions.zsh" 2>/dev/null || true
+    cp "${CFG_DIR}/zsh/webapp.zsh"    "${HOME}/.config/zsh/webapp.zsh"    2>/dev/null || true
   fi
-  cp "${SCRIPT_DIR}/../configs/zsh/.zshrc" "${HOME}/.zshrc"
-
-  # Copy zsh config files to ~/.config/zsh/
-  info "Setting up zsh config files..."
-  mkdir -p "${HOME}/.config/zsh"
-  cp "${SCRIPT_DIR}/../configs/zsh/omz.zsh" "${HOME}/.config/zsh/omz.zsh"
-  cp "${SCRIPT_DIR}/../configs/zsh/aliases.zsh" "${HOME}/.config/zsh/aliases.zsh"
-  cp "${SCRIPT_DIR}/../configs/zsh/functions.zsh" "${HOME}/.config/zsh/functions.zsh"
-  cp "${SCRIPT_DIR}/../configs/zsh/webapp.zsh" "${HOME}/.config/zsh/webapp.zsh"
 
   # Setup NVM and install latest Node.js
   if command -v nvm >/dev/null 2>&1; then
-    info "Setting up NVM and installing latest Node.js..."
-    export NVM_DIR="$HOME/.nvm"
-    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-    [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
-
-    # Install latest LTS version of Node.js
-    nvm install --lts
-    nvm use --lts
-    nvm alias default node
-    info "Node.js $(node --version) installed via NVM"
+    if (( NO_ACT )); then
+      info "[dry-run] Would install & use latest LTS Node.js via nvm"
+    else
+      info "Setting up NVM and installing latest Node.js..."
+      export NVM_DIR="$HOME/.nvm"
+      [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+      [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+      nvm install --lts
+      nvm use --lts
+      nvm alias default node
+      info "Node.js $(node --version) installed via NVM"
+    fi
   else
     warn "nvm not found; skipping Node.js installation"
   fi
 
   # Copy update script
-  info "Setting up update script..."
-  mkdir -p "${HOME}/.scripts"
-  cp "${SCRIPT_DIR}/../configs/scripts/update.sh" "${HOME}/.scripts/update.sh"
-  chmod +x "${HOME}/.scripts/update.sh"
+  if (( NO_ACT )); then
+    info "[dry-run] Would install update script to ~/.scripts/update.sh"
+  else
+    info "Setting up update script..."
+    mkdir -p "${HOME}/.scripts"
+    if [[ -f "${CFG_DIR}/scripts/update.sh" ]]; then
+      cp "${CFG_DIR}/scripts/update.sh" "${HOME}/.scripts/update.sh"
+      chmod +x "${HOME}/.scripts/update.sh"
+    else
+      warn "Update script missing at ${CFG_DIR}/scripts/update.sh"
+    fi
+  fi
 
   # Set zsh as default shell
   if command -v zsh >/dev/null 2>&1; then
     if [[ "$SHELL" != "$(command -v zsh)" ]]; then
-      info "Attempting to set default shell to zsh (you may be prompted for password)..."
-      chsh -s "$(command -v zsh)" || warn "Failed to change shell; you can run: chsh -s $(command -v zsh)"
+      if (( NO_ACT )); then
+        info "[dry-run] Would run: chsh -s $(command -v zsh)"
+      else
+        info "Attempting to set default shell to zsh (you may be prompted for password)..."
+        chsh -s "$(command -v zsh)" || warn "Failed to change shell; you can run: chsh -s $(command -v zsh)"
+      fi
     fi
   fi
 
   # Enable fstrim timer for SSD maintenance
-  info "Enabling weekly fstrim timer for SSD maintenance..."
-  sudo systemctl enable fstrim.timer || warn "Failed to enable fstrim.timer"
+  if (( NO_ACT )); then
+    info "[dry-run] Would enable fstrim.timer"
+  else
+    info "Enabling weekly fstrim timer for SSD maintenance..."
+    sudo systemctl enable fstrim.timer || warn "Failed to enable fstrim.timer"
+  fi
 
   # Install web applications
-  info "Installing web applications..."
-  # Source the webapp function
-  source "${HOME}/.config/zsh/webapp.zsh" 2>/dev/null || true
-
-  # Install webapps
-  if command -v webapp-install >/dev/null 2>&1; then
-    webapp-install "ChatGPT" https://chatgpt.com/ https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/chatgpt.png || warn "Failed to install ChatGPT webapp"
-    webapp-install "YouTube" https://youtube.com/ https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/youtube.png || warn "Failed to install YouTube webapp"
-    webapp-install "Notion" https://notion.so/ https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/notion.png || warn "Failed to install Notion webapp"
+  if (( NO_ACT )); then
+    info "[dry-run] Would install defined web applications via webapp-install"
   else
-    warn "webapp-install function not available; skipping webapp installation"
+    info "Installing web applications..."
+    # Source the webapp function
+    source "${HOME}/.config/zsh/webapp.zsh" 2>/dev/null || true
+    if command -v webapp-install >/dev/null 2>&1; then
+      webapp-install "ChatGPT" https://chatgpt.com/ https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/chatgpt.png || warn "Failed to install ChatGPT webapp"
+      webapp-install "YouTube" https://youtube.com/ https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/youtube.png || warn "Failed to install YouTube webapp"
+      webapp-install "Notion" https://notion.so/ https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/notion.png || warn "Failed to install Notion webapp"
+      webapp-install "WhatsApp" https://web.whatsapp.com/ https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/whatsapp.png || warn "Failed to install WhatsApp webapp"
+      webapp-install "Reddit" https://www.reddit.com/ https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/reddit.png || warn "Failed to install Reddit webapp"
+    else
+      warn "webapp-install function not available; skipping webapp installation"
+    fi
   fi
 
   success "Post-install configuration complete."
