@@ -236,10 +236,10 @@ EOF
 
   # Enable fstrim timer for SSD maintenance
   if (( NO_ACT )); then
-    info "[dry-run] Would enable fstrim.timer"
+    info "[dry-run] Would enable and start fstrim.timer"
   else
-    info "Enabling weekly fstrim timer for SSD maintenance..."
-    sudo systemctl enable fstrim.timer || warn "Failed to enable fstrim.timer"
+    info "Enabling and starting weekly fstrim timer for SSD maintenance..."
+    sudo systemctl enable --now fstrim.timer || warn "Failed to enable fstrim.timer"
   fi
 
   # Desktop application entries & icons bundled in repo
@@ -276,6 +276,7 @@ EOF
       webapp-install "Notion" https://notion.so/ https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/notion.png || warn "Failed to install Notion webapp"
       webapp-install "WhatsApp" https://web.whatsapp.com/ https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/whatsapp.png || warn "Failed to install WhatsApp webapp"
       webapp-install "Reddit" https://www.reddit.com/ https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/reddit.png || warn "Failed to install Reddit webapp"
+      webapp-install "Gmail" https://mail.google.com/ https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/gmail.png || warn "Failed to install Gmail webapp"
     else
       warn "webapp-install function not available; skipping webapp installation"
     fi

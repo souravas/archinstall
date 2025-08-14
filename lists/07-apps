@@ -1,5 +1,7 @@
 anki-bin
 calibre
+filelight
+partitionmanager
 localsend-bin
 megasync-bin
 mpv
@@ -7,6 +9,7 @@ mpv-uosc
 obsidian
 qalculate-qt
 qbittorrent
+superproductivity-bin
 ticktick
 veracrypt
 vlc
