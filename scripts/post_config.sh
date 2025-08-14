@@ -120,18 +120,48 @@ post_config() {
     info "Setting up zsh config..."
     if [[ -f "${HOME}/.zshrc" ]]; then
       cp "${HOME}/.zshrc" "${HOME}/.zshrc.backup.$(date +%s)"
+      info "Backed up existing .zshrc"
     fi
+
+    # Check for .zshrc in multiple possible locations
+    local zshrc_source=""
     if [[ -f "${CFG_DIR}/zsh/.zshrc" ]]; then
-      cp "${CFG_DIR}/zsh/.zshrc" "${HOME}/.zshrc"
-    else
-      warn ".zshrc missing at ${CFG_DIR}/zsh/.zshrc"
+      zshrc_source="${CFG_DIR}/zsh/.zshrc"
+    elif [[ -f "${CFG_DIR}/.zshrc" ]]; then
+      zshrc_source="${CFG_DIR}/.zshrc"
+    elif [[ -f "${REPO_ROOT}/.zshrc" ]]; then
+      zshrc_source="${REPO_ROOT}/.zshrc"
     fi
+
+    if [[ -n "$zshrc_source" ]]; then
+      cp "$zshrc_source" "${HOME}/.zshrc"
+      info "Copied .zshrc from $zshrc_source"
+    else
+      warn ".zshrc not found in expected locations, creating basic one"
+      cat > "${HOME}/.zshrc" << 'EOF'
+# Basic zsh configuration
+export ZSH="$HOME/.oh-my-zsh"
+ZSH_THEME="robbyrussell"
+plugins=(git)
+source $ZSH/oh-my-zsh.sh
+
+# Load custom configurations if they exist
+[[ -f ~/.config/zsh/omz.zsh ]] && source ~/.config/zsh/omz.zsh
+[[ -f ~/.config/zsh/aliases.zsh ]] && source ~/.config/zsh/aliases.zsh
+[[ -f ~/.config/zsh/functions.zsh ]] && source ~/.config/zsh/functions.zsh
+[[ -f ~/.config/zsh/webapp.zsh ]] && source ~/.config/zsh/webapp.zsh
+
+# Initialize starship if available
+command -v starship >/dev/null && eval "$(starship init zsh)"
+EOF
+    fi
+
     info "Setting up zsh config files..."
     mkdir -p "${HOME}/.config/zsh"
-    cp "${CFG_DIR}/zsh/omz.zsh"       "${HOME}/.config/zsh/omz.zsh"       2>/dev/null || true
-    cp "${CFG_DIR}/zsh/aliases.zsh"   "${HOME}/.config/zsh/aliases.zsh"   2>/dev/null || true
-    cp "${CFG_DIR}/zsh/functions.zsh" "${HOME}/.config/zsh/functions.zsh" 2>/dev/null || true
-    cp "${CFG_DIR}/zsh/webapp.zsh"    "${HOME}/.config/zsh/webapp.zsh"    2>/dev/null || true
+    cp "${CFG_DIR}/zsh/omz.zsh"       "${HOME}/.config/zsh/omz.zsh"       2>/dev/null || warn "omz.zsh not found"
+    cp "${CFG_DIR}/zsh/aliases.zsh"   "${HOME}/.config/zsh/aliases.zsh"   2>/dev/null || warn "aliases.zsh not found"
+    cp "${CFG_DIR}/zsh/functions.zsh" "${HOME}/.config/zsh/functions.zsh" 2>/dev/null || warn "functions.zsh not found"
+    cp "${CFG_DIR}/zsh/webapp.zsh"    "${HOME}/.config/zsh/webapp.zsh"    2>/dev/null || warn "webapp.zsh not found"
   fi
 
   # Setup NVM and install latest Node.js

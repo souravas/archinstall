@@ -1,9 +1,31 @@
 #!/usr/bin/env bash
 
-# Copied from omarchy/install/development/docker.sh
+# Docker setup script - copied from omarchy/install/development/docker.sh
 set -euo pipefail
 
-yay -S --noconfirm --needed docker docker-compose docker-buildx
+# Source lib functions if available for consistent messaging
+if declare -F info >/dev/null 2>&1; then
+	: # Functions already available
+elif [[ -f "$(dirname "${BASH_SOURCE[0]}")/lib.sh" ]]; then
+	source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
+else
+	# Fallback functions
+	info() { echo "[INFO] $*"; }
+	warn() { echo "[WARN] $*" >&2; }
+	error() { echo "[ERROR] $*" >&2; }
+	success() { echo "[SUCCESS] $*"; }
+fi
+
+info "Setting up Docker..."
+
+# Install Docker packages if not already present
+if ! command -v docker >/dev/null 2>&1; then
+	info "Installing Docker packages..."
+	yay -S --noconfirm --needed docker docker-compose docker-buildx
+else
+	info "Docker already installed, ensuring all components are present..."
+	yay -S --noconfirm --needed docker docker-compose docker-buildx
+fi
 
 # Limit log size to avoid running out of disk
 sudo mkdir -p /etc/docker

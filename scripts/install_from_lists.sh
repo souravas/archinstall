@@ -4,14 +4,26 @@
 install_from_list_file() {
   local file="$1"
   [[ -f "$file" ]] || return 0
+
+  verbose "Processing package list: $file"
+
   while IFS= read -r line || [[ -n "$line" ]]; do
-    line="${line%%#*}"; line="${line#"${line%%[![:space:]]*}"}"; line="${line%"${line##*[![:space:]]}"}";
-    [[ -z "$line" ]] && continue
-    # Fast path: if it's an official repo pkg, use pacman directly (faster, no AUR metadata)
+    # Remove comments and trim whitespace
+    line="${line%%#*}"
+    line="${line#"${line%%[![:space:]]*}"}"
+    line="${line%"${line##*[![:space:]]}"}"
+
+    # Skip empty lines
+    [[ -n "$line" ]] || continue
+
+    verbose "Processing package: $line"
+
+    # Fast path: check if it's an official repo package first
     if pacman -Si -- "$line" &>/dev/null; then
       install_repo_pkg "$line"
     else
-      install_aur_pkg "$line"  # falls back to yay (handles both build + bin AUR)
+      # Fallback to AUR (handles both source and binary packages)
+      install_aur_pkg "$line"
     fi
   done < "$file"
 }
