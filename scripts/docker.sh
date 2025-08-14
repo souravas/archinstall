@@ -33,7 +33,6 @@ echo '{"log-driver":"json-file","log-opts":{"max-size":"10m","max-file":"5"}}' |
 
 # Start Docker automatically
 sudo systemctl enable docker
-sudo systemctl start docker || echo "Warning: failed to start docker service now" >&2
 
 # Give this user privileged Docker access
 sudo usermod -aG docker ${USER}
@@ -47,12 +46,5 @@ EOF
 
 sudo systemctl daemon-reload
 
-if command -v docker >/dev/null 2>&1; then
-	if ! docker info >/dev/null 2>&1; then
-		echo "Docker installed but 'docker info' failed (might require relogin for group)." >&2
-	else
-		echo "Docker daemon responding (docker info succeeded)." >&2
-	fi
-fi
-
-echo "Docker setup complete. You may need to log out/in for group membership to apply." >&2
+success "Docker setup complete. Docker will start automatically on next boot."
+success "You may need to log out/in for group membership to apply."

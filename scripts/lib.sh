@@ -70,7 +70,7 @@ ensure_yay() {
 
   # Ensure cleanup on exit
   cleanup_yay() {
-    [[ -d "$tmpdir" ]] && rm -rf "$tmpdir"
+    [[ -n "${tmpdir:-}" && -d "$tmpdir" ]] && rm -rf "$tmpdir"
   }
   trap cleanup_yay EXIT
 
