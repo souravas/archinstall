@@ -20,8 +20,20 @@ tldr -u
 echo "🧹 Cleaning orphaned packages..."
 orphans=$(pacman -Qdtq 2>/dev/null || true)
 if [[ -n "$orphans" ]]; then
-    sudo pacman -Rns $orphans --noconfirm
-    echo "✅ Orphaned packages removed"
+    # Filter out packages that don't exist anymore
+    valid_orphans=""
+    for pkg in $orphans; do
+        if pacman -Qi "$pkg" &>/dev/null; then
+            valid_orphans="$valid_orphans $pkg"
+        fi
+    done
+
+    if [[ -n "$valid_orphans" ]]; then
+        sudo pacman -Rns $valid_orphans --noconfirm
+        echo "✅ Orphaned packages removed"
+    else
+        echo "✅ No valid orphaned packages to remove"
+    fi
 else
     echo "✅ No orphaned packages found"
 fi
