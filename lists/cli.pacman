@@ -1,0 +1,23 @@
+# one package per line; lines starting with # are ignored
+git
+curl
+zoxide
+eza
+bat
+ripgrep
+fd
+fzf
+ffmpeg
+yt-dlp
+fastfetch
+fortune-mod
+cowsay
+lolcat
+vim
+btop
+cmatrix
+lazygit
+zellij
+mediainfo
+podman
+podman-docker

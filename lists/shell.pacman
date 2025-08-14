@@ -1,0 +1,5 @@
+# one package per line; lines starting with # are ignored
+zsh
+starship
+zsh-autosuggestions
+zsh-syntax-highlighting
