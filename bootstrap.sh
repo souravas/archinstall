@@ -40,4 +40,7 @@ fi
 # Run post-install user configs (zsh, starship, ghostty, git, etc.)
 post_config
 
+# Verify essential commands are available
+verify_installation
+
 success "All done! Log out/in (or chsh to zsh) to activate shell changes."

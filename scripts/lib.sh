@@ -97,3 +97,24 @@ install_aur_pkg() {
     fi
   fi
 }
+
+verify_installation() {
+  info "Verifying installation..."
+
+  local essential_commands=("git" "zsh" "starship" "code")
+  local missing=()
+
+  for cmd in "${essential_commands[@]}"; do
+    if ! command -v "$cmd" >/dev/null 2>&1; then
+      missing+=("$cmd")
+    fi
+  done
+
+  if (( ${#missing[@]} > 0 )); then
+    warn "Missing essential commands: ${missing[*]}"
+    return 1
+  else
+    success "All essential commands available"
+    return 0
+  fi
+}

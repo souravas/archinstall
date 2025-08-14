@@ -4,6 +4,7 @@ btop
 cmatrix
 cowsay
 curl
+diff-so-fancy
 eza
 fastfetch
 fd
@@ -16,6 +17,7 @@ lolcat
 mediainfo
 neovim
 ntfs-3g
+nvm
 podman
 podman-compose
 podman-docker
@@ -23,6 +25,7 @@ ripgrep
 unrar
 unzip
 vim
+wget
 yt-dlp
 zellij
 zip

@@ -16,6 +16,25 @@ post_config() {
   git config --global user.email "$(cat "${SCRIPT_DIR}/../configs/git/user.email")"
   git config --global core.editor "$(cat "${SCRIPT_DIR}/../configs/git/core.editor")"
 
+  # Configure diff-so-fancy if available
+  if command -v diff-so-fancy >/dev/null 2>&1; then
+    info "Configuring git to use diff-so-fancy..."
+    git config --global core.pager "diff-so-fancy | less --tabs=4 -RFX"
+    git config --global interactive.diffFilter "diff-so-fancy --patch"
+    git config --global color.ui true
+    git config --global color.diff-highlight.oldNormal "red bold"
+    git config --global color.diff-highlight.oldHighlight "red bold 52"
+    git config --global color.diff-highlight.newNormal "green bold"
+    git config --global color.diff-highlight.newHighlight "green bold 22"
+    git config --global color.diff.meta "11"
+    git config --global color.diff.frag "magenta bold"
+    git config --global color.diff.func "146 bold"
+    git config --global color.diff.commit "yellow bold"
+    git config --global color.diff.old "red bold"
+    git config --global color.diff.new "green bold"
+    git config --global color.diff.whitespace "red reverse"
+  fi
+
   # Ghostty config
   info "Setting up Ghostty config..."
   mkdir -p "${HOME}/.config/ghostty"
@@ -43,6 +62,29 @@ post_config() {
     cp "${HOME}/.zshrc" "${HOME}/.zshrc.backup.$(date +%s)"
   fi
   cp "${SCRIPT_DIR}/../configs/zsh/.zshrc" "${HOME}/.zshrc"
+
+  # Copy zsh config files to ~/.config/zsh/
+  info "Setting up zsh config files..."
+  mkdir -p "${HOME}/.config/zsh"
+  cp "${SCRIPT_DIR}/../configs/zsh/omz.zsh" "${HOME}/.config/zsh/omz.zsh"
+  cp "${SCRIPT_DIR}/../configs/zsh/aliases.zsh" "${HOME}/.config/zsh/aliases.zsh"
+  cp "${SCRIPT_DIR}/../configs/zsh/functions.zsh" "${HOME}/.config/zsh/functions.zsh"
+
+  # Setup NVM and install latest Node.js
+  if command -v nvm >/dev/null 2>&1; then
+    info "Setting up NVM and installing latest Node.js..."
+    export NVM_DIR="$HOME/.nvm"
+    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+    [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+
+    # Install latest LTS version of Node.js
+    nvm install --lts
+    nvm use --lts
+    nvm alias default node
+    info "Node.js $(node --version) installed via NVM"
+  else
+    warn "nvm not found; skipping Node.js installation"
+  fi
 
   # Copy update script
   info "Setting up update script..."
