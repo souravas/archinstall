@@ -10,25 +10,21 @@ post_config() {
     fc-cache -fv || true
   fi
 
-  # Git globals
+  # Git globals from config files
   info "Configuring git globals..."
-  git config --global user.name "sourav"
-  git config --global user.email "souravas007@gmail.com"
-  git config --global core.editor "code -w"
+  git config --global user.name "$(cat "${SCRIPT_DIR}/../configs/git/user.name")"
+  git config --global user.email "$(cat "${SCRIPT_DIR}/../configs/git/user.email")"
+  git config --global core.editor "$(cat "${SCRIPT_DIR}/../configs/git/core.editor")"
 
   # Ghostty config
+  info "Setting up Ghostty config..."
   mkdir -p "${HOME}/.config/ghostty"
-  cat > "${HOME}/.config/ghostty/config" <<'EOF'
-theme = catppuccin-mocha
-window-theme = dark
-background-opacity = 0.90
-EOF
+  cp "${SCRIPT_DIR}/../configs/ghostty/config" "${HOME}/.config/ghostty/config"
 
   # Starship preset
   mkdir -p "${HOME}/.config"
   if command -v starship >/dev/null 2>&1; then
     info "Writing starship preset (catppuccin-powerline)..."
-    # Do not clobber an existing custom config
     if [[ ! -f "${HOME}/.config/starship.toml" ]]; then
       starship preset catppuccin-powerline -o "${HOME}/.config/starship.toml" || true
     else
@@ -45,41 +41,33 @@ EOF
     sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
   fi
 
-  # Oh My Zsh plugins (install under $ZSH_CUSTOM/plugins)
+  # Oh My Zsh plugins
   export ZSH="${HOME}/.oh-my-zsh"
   export ZSH_CUSTOM="${ZSH_CUSTOM:-${ZSH}/custom}"
   mkdir -p "${ZSH_CUSTOM}/plugins"
   if [[ ! -d "${ZSH_CUSTOM}/plugins/zsh-autosuggestions" ]]; then
+    info "Installing zsh-autosuggestions..."
     git clone --depth 1 https://github.com/zsh-users/zsh-autosuggestions "${ZSH_CUSTOM}/plugins/zsh-autosuggestions"
   fi
   if [[ ! -d "${ZSH_CUSTOM}/plugins/zsh-syntax-highlighting" ]]; then
+    info "Installing zsh-syntax-highlighting..."
     git clone --depth 1 https://github.com/zsh-users/zsh-syntax-highlighting "${ZSH_CUSTOM}/plugins/zsh-syntax-highlighting"
   fi
 
   # Copy zshrc (backup existing)
+  info "Setting up zsh config..."
   if [[ -f "${HOME}/.zshrc" ]]; then
     cp "${HOME}/.zshrc" "${HOME}/.zshrc.backup.$(date +%s)"
   fi
-  cp "${SCRIPT_DIR}/configs/zsh/.zshrc" "${HOME}/.zshrc"
+  cp "${SCRIPT_DIR}/../configs/zsh/.zshrc" "${HOME}/.zshrc"
 
-  # ~/.scripts/update.sh for alias u
+  # Copy update script
+  info "Setting up update script..."
   mkdir -p "${HOME}/.scripts"
-  cat > "${HOME}/.scripts/update.sh" <<'EOS'
-#!/usr/bin/env bash
-set -euo pipefail
-echo "[*] Syncing and updating pacman packages..."
-sudo pacman -Syu --noconfirm
-if command -v yay >/dev/null 2>&1; then
-  echo "[*] Updating AUR packages with yay..."
-  yay -Syu --devel --timeupdate --noconfirm
-fi
-echo "[*] Cleaning package caches (optional)..."
-paccache -r || true
-echo "[✓] System updated."
-EOS
+  cp "${SCRIPT_DIR}/../configs/scripts/update.sh" "${HOME}/.scripts/update.sh"
   chmod +x "${HOME}/.scripts/update.sh"
 
-  # Try to set zsh as default shell
+  # Set zsh as default shell
   if command -v zsh >/dev/null 2>&1; then
     if [[ "$SHELL" != "$(command -v zsh)" ]]; then
       info "Attempting to set default shell to zsh (you may be prompted for password)..."
