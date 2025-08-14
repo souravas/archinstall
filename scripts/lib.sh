@@ -69,7 +69,7 @@ ensure_yay() {
   tmpdir="$(mktemp -d)"
 
   # Ensure cleanup on exit
-  local cleanup_yay() {
+  cleanup_yay() {
     [[ -d "$tmpdir" ]] && rm -rf "$tmpdir"
   }
   trap cleanup_yay EXIT
