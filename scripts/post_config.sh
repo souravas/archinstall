@@ -24,14 +24,10 @@ post_config() {
   # Starship preset
   mkdir -p "${HOME}/.config"
   if command -v starship >/dev/null 2>&1; then
-    info "Writing starship preset (catppuccin-powerline)..."
-    if [[ ! -f "${HOME}/.config/starship.toml" ]]; then
-      starship preset catppuccin-powerline -o "${HOME}/.config/starship.toml" || true
-    else
-      warn "~/.config/starship.toml exists; skipping preset."
-    fi
+    info "Setting up starship config (catppuccin-powerline)..."
+    starship preset catppuccin-powerline -o "${HOME}/.config/starship.toml" || true
   else
-    warn "starship not found; skipping preset (it will be available after next run)."
+    warn "starship not found; skipping preset."
   fi
 
   # Oh My Zsh (non-interactive)
@@ -39,19 +35,6 @@ post_config() {
     info "Installing Oh My Zsh (non-interactive)..."
     export RUNZSH=no CHSH=no KEEP_ZSHRC=yes
     sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
-  fi
-
-  # Oh My Zsh plugins
-  export ZSH="${HOME}/.oh-my-zsh"
-  export ZSH_CUSTOM="${ZSH_CUSTOM:-${ZSH}/custom}"
-  mkdir -p "${ZSH_CUSTOM}/plugins"
-  if [[ ! -d "${ZSH_CUSTOM}/plugins/zsh-autosuggestions" ]]; then
-    info "Installing zsh-autosuggestions..."
-    git clone --depth 1 https://github.com/zsh-users/zsh-autosuggestions "${ZSH_CUSTOM}/plugins/zsh-autosuggestions"
-  fi
-  if [[ ! -d "${ZSH_CUSTOM}/plugins/zsh-syntax-highlighting" ]]; then
-    info "Installing zsh-syntax-highlighting..."
-    git clone --depth 1 https://github.com/zsh-users/zsh-syntax-highlighting "${ZSH_CUSTOM}/plugins/zsh-syntax-highlighting"
   fi
 
   # Copy zshrc (backup existing)
