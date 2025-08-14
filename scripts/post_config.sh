@@ -40,6 +40,16 @@ post_config() {
   mkdir -p "${HOME}/.config/ghostty"
   cp "${SCRIPT_DIR}/../configs/ghostty/config" "${HOME}/.config/ghostty/config"
 
+  # Fastfetch config
+  info "Setting up Fastfetch config..."
+  mkdir -p "${HOME}/.local/share/fastfetch/images"
+  mkdir -p "${HOME}/.local/share/fastfetch/presets"
+  cp "${SCRIPT_DIR}/../configs/fastfetch/images/"* "${HOME}/.local/share/fastfetch/images/"
+  cp "${SCRIPT_DIR}/../configs/fastfetch/presets/groups.jsonc" "${HOME}/.local/share/fastfetch/presets/groups.jsonc"
+  mkdir -p "${HOME}/.local/bin"
+  cp "${SCRIPT_DIR}/../configs/fastfetch/fastfetch.sh" "${HOME}/.local/bin/fastfetch"
+  chmod +x "${HOME}/.local/bin/fastfetch"
+
   # Starship preset
   mkdir -p "${HOME}/.config"
   if command -v starship >/dev/null 2>&1; then
