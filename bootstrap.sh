@@ -114,6 +114,18 @@ else
 	info "[dry-run] Would run docker.sh setup script"
 fi
 
+# Run KVM/QEMU setup script to install virtualization stack
+info "Phase 2b: Setting up KVM/QEMU virtualization..."
+if ! (( NO_ACT )); then
+	if [[ -f "${SCRIPT_DIR}/scripts/kvm.sh" ]]; then
+		source "${SCRIPT_DIR}/scripts/kvm.sh"
+	else
+		warn "kvm.sh script missing; skipping KVM setup"
+	fi
+else
+	info "[dry-run] Would run kvm.sh setup script"
+fi
+
 # Print failure summary (if any)
 if (( NO_ACT )); then
 	info "Dry-run complete (no changes made)."
