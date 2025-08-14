@@ -79,6 +79,7 @@ post_config() {
   cp "${SCRIPT_DIR}/../configs/zsh/omz.zsh" "${HOME}/.config/zsh/omz.zsh"
   cp "${SCRIPT_DIR}/../configs/zsh/aliases.zsh" "${HOME}/.config/zsh/aliases.zsh"
   cp "${SCRIPT_DIR}/../configs/zsh/functions.zsh" "${HOME}/.config/zsh/functions.zsh"
+  cp "${SCRIPT_DIR}/../configs/zsh/webapp.zsh" "${HOME}/.config/zsh/webapp.zsh"
 
   # Setup NVM and install latest Node.js
   if command -v nvm >/dev/null 2>&1; then
@@ -113,6 +114,20 @@ post_config() {
   # Enable fstrim timer for SSD maintenance
   info "Enabling weekly fstrim timer for SSD maintenance..."
   sudo systemctl enable fstrim.timer || warn "Failed to enable fstrim.timer"
+
+  # Install web applications
+  info "Installing web applications..."
+  # Source the webapp function
+  source "${HOME}/.config/zsh/webapp.zsh" 2>/dev/null || true
+
+  # Install webapps
+  if command -v webapp-install >/dev/null 2>&1; then
+    webapp-install "ChatGPT" https://chatgpt.com/ https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/chatgpt.png || warn "Failed to install ChatGPT webapp"
+    webapp-install "YouTube" https://youtube.com/ https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/youtube.png || warn "Failed to install YouTube webapp"
+    webapp-install "Notion" https://notion.so/ https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/notion.png || warn "Failed to install Notion webapp"
+  else
+    warn "webapp-install function not available; skipping webapp installation"
+  fi
 
   success "Post-install configuration complete."
 }
