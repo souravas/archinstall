@@ -27,6 +27,7 @@ alias lzd='lazydocker'
 alias lg='lazygit'
 alias lz='lazygit'
 alias cat='bat'
+alias fastfetch='fastfetch --config groups'
 
 # Git
 alias gcm='git commit -m'

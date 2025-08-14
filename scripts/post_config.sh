@@ -82,11 +82,6 @@ post_config() {
     mkdir -p "${HOME}/.local/share/fastfetch/images" "${HOME}/.local/share/fastfetch/presets"
     cp "${CFG_DIR}/fastfetch/images/"* "${HOME}/.local/share/fastfetch/images/" 2>/dev/null || true
     cp "${CFG_DIR}/fastfetch/presets/groups.jsonc" "${HOME}/.local/share/fastfetch/presets/groups.jsonc" 2>/dev/null || true
-    mkdir -p "${HOME}/.local/bin"
-    if [[ -f "${CFG_DIR}/fastfetch/fastfetch.sh" ]]; then
-      cp "${CFG_DIR}/fastfetch/fastfetch.sh" "${HOME}/.local/bin/fastfetch"
-      chmod +x "${HOME}/.local/bin/fastfetch"
-    fi
   fi
 
   # Starship preset
