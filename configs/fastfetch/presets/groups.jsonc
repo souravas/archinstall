@@ -121,12 +121,6 @@
             "keyColor": "33"
         },
         {
-            "type": "brightness",
-            "key": " ├  ",
-            "keyColor": "33",
-            "format": "Brightness ({2}): {1}"
-        },
-        {
             "type": "battery",
             "key": " └  ",
             "keyColor": "33"
