@@ -7,20 +7,6 @@ compress() {
     tar -czf "${1%/}.tar.gz" "${1%/}"
 }
 
-# Brightness control function
-bright() {
-    if [[ $1 =~ ^[0-9]+$ && $1 -ge 0 && $1 -le 100 ]]; then
-        i2c_device=$(ddccontrol -p 2>/dev/null | grep -o 'dev:/dev/i2c-[0-9]\\+' | sed -n '2p')
-        if [[ -n $i2c_device ]]; then
-            sudo ddccontrol -r 0x10 -w "$1" "$i2c_device" &>/dev/null &
-        else
-            echo "No second active monitor detected."
-        fi
-    else
-        echo "Please enter a valid brightness level (0-100)."
-    fi
-}
-
 # Media duration calculation function
 media_duration() {
     local sum_s=0 dur time hh mm ss total_s H M S
