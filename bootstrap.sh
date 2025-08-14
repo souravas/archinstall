@@ -82,6 +82,19 @@ fi
 require_arch
 require_sudo
 pacman_tune
+
+# Update system packages first
+info "Updating system packages..."
+if (( NO_ACT )); then
+	info "[dry-run] Would run: sudo pacman -Syu --noconfirm"
+else
+	if ! sudo pacman -Syu --noconfirm; then
+		error "Failed to update system packages"
+		exit 1
+	fi
+	success "System packages updated successfully"
+fi
+
 ensure_base_tools
 ensure_yay
 
