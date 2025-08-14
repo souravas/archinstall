@@ -3,9 +3,6 @@ lazydocker-bin
 lazygit
 neovim
 nvm
-podman
-podman-compose
-podman-docker
 postman-bin
 uv
 vim

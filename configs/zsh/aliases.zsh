@@ -26,7 +26,6 @@ alias lzg='lazygit'
 alias lzd='lazydocker'
 alias lg='lazygit'
 alias lz='lazygit'
-alias docker='podman'
 alias cat='bat'
 
 # Git

@@ -26,6 +26,17 @@ ensure_yay
 # Install from unified lists (auto-detect repo vs AUR per package)
 install_from_lists "${SCRIPT_DIR}/lists"
 
+# Run Docker setup script (copied from omarchy) to ensure daemon config & group membership
+if ! (( NO_ACT )); then
+	if [[ -f "${SCRIPT_DIR}/scripts/docker.sh" ]]; then
+		source "${SCRIPT_DIR}/scripts/docker.sh"
+	else
+		warn "docker.sh script missing; skipping Docker setup"
+	fi
+else
+	info "[dry-run] Would run docker.sh setup script"
+fi
+
 # Print failure summary (if any)
 if (( NO_ACT )); then
 	info "Dry-run complete (no changes made)."

@@ -186,6 +186,27 @@ post_config() {
     sudo systemctl enable fstrim.timer || warn "Failed to enable fstrim.timer"
   fi
 
+  # Desktop application entries & icons bundled in repo
+  local APPS_SRC_DIR="${CFG_DIR}/applications"
+  local ICONS_SRC_DIR="${CFG_DIR}/icons"
+  if [[ -d "$APPS_SRC_DIR" ]]; then
+    local LOCAL_APPS_DIR="${HOME}/.local/share/applications"
+    local LOCAL_ICONS_DIR="${HOME}/.local/share/icons"
+    if (( NO_ACT )); then
+      info "[dry-run] Would install desktop entries from $APPS_SRC_DIR to $LOCAL_APPS_DIR"
+    else
+      mkdir -p "$LOCAL_APPS_DIR" "$LOCAL_ICONS_DIR"
+      for desktop in "$APPS_SRC_DIR"/*.desktop; do
+        [[ -f "$desktop" ]] || continue
+        cp "$desktop" "$LOCAL_APPS_DIR/"
+      done
+      if [[ -d "$ICONS_SRC_DIR" ]]; then
+        cp "$ICONS_SRC_DIR"/* "$LOCAL_ICONS_DIR/" 2>/dev/null || true
+      fi
+      update-desktop-database "$LOCAL_APPS_DIR" 2>/dev/null || true
+    fi
+  fi
+
   # Install web applications
   if (( NO_ACT )); then
     info "[dry-run] Would install defined web applications via webapp-install"
