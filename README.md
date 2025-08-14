@@ -25,14 +25,29 @@ bash bootstrap.sh
 
 ## Lists
 Current category files (repo + AUR mixed):
-- `lists/fonts`
-- `lists/browsers`
-- `lists/dev`
-- `lists/terminal`
-- `lists/cli`
-- `lists/shell`
+- `lists/01-fonts`
+- `lists/02-cli`
+- `lists/03-shell`
+- `lists/04-terminal`
+- `lists/05-dev`
+- `lists/06-browsers`
+- `lists/07-apps`
 
 You can add/remove packages line-by-line. Lines starting with `#` are ignored.
+
+### Web Applications
+Simple webapp installer available as a shell function:
+- Prefers **Brave** browser for better privacy
+- Available as `webapp-install` command after bootstrap
+
+Install webapps from your terminal:
+```bash
+# Interactive mode
+webapp-install
+
+# Direct installation
+webapp-install "GitHub" "https://github.com" "https://icon-url.png"
+```
 
 ### Dry-run
 Preview actions without installing:

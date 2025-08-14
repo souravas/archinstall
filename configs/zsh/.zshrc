@@ -5,6 +5,7 @@ source "${ZDOTDIR:-$HOME}/.config/zsh/omz.zsh"
 # Source custom aliases and functions
 source "${ZDOTDIR:-$HOME}/.config/zsh/aliases.zsh"
 source "${ZDOTDIR:-$HOME}/.config/zsh/functions.zsh"
+source "${ZDOTDIR:-$HOME}/.config/zsh/webapp.zsh"
 
 # Paths
 export PATH="$HOME/.local/bin:$PATH"
