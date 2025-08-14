@@ -25,7 +25,7 @@ post_config() {
   fi
 
   # Git globals from config files
-  if [[ -f "${CFG_DIR}/git/user.name" ]]; then
+  if [[ -f "${CFG_DIR}/git/user.name" && -f "${CFG_DIR}/git/user.email" && -f "${CFG_DIR}/git/core.editor" ]]; then
     if (( NO_ACT )); then
       info "[dry-run] Would set git user.name/user.email/core.editor from ${CFG_DIR}/git"
     else
@@ -36,6 +36,7 @@ post_config() {
     fi
   else
     warn "Git config files missing under ${CFG_DIR}/git (skipping)"
+    warn "Expected files: user.name, user.email, core.editor"
   fi
 
   # Configure diff-so-fancy if available
@@ -167,8 +168,8 @@ EOF
       info "Setting up development environment..."
 
       # Run the dev_env.sh script for Node.js setup
-      if [[ -f "${SCRIPT_DIR}/dev_env.sh" ]]; then
-        bash "${SCRIPT_DIR}/dev_env.sh" node || warn "Failed to setup Node.js via dev_env.sh"
+      if [[ -f "${SCRIPT_DIR}/scripts/dev_env.sh" ]]; then
+        bash "${SCRIPT_DIR}/scripts/dev_env.sh" node || warn "Failed to setup Node.js via dev_env.sh"
       else
         warn "dev_env.sh not found; setting up mise manually..."
 

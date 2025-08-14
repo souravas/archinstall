@@ -47,13 +47,22 @@ install_node() {
   check_mise
   setup_mise
 
+  # Source mise activation for current session
+  if command -v mise >/dev/null 2>&1; then
+    eval "$(mise activate bash)" 2>/dev/null || true
+  fi
+
   # Install Node.js LTS
   if mise use --global node@lts; then
     success "Node.js LTS installed successfully"
 
     # Show version
-    mise exec node@lts -- node --version || true
-    mise exec node@lts -- npm --version || true
+    if mise exec node@lts -- node --version 2>/dev/null; then
+      info "Node.js version: $(mise exec node@lts -- node --version)"
+    fi
+    if mise exec node@lts -- npm --version 2>/dev/null; then
+      info "npm version: $(mise exec node@lts -- npm --version)"
+    fi
 
     info "You can now use Node.js and npm"
     info "Consider installing global packages like: npm install -g pnpm yarn"

@@ -50,7 +50,10 @@ pacman_tune() {
   fi
 
   info "Updating package database..."
-  sudo pacman -Sy --noconfirm || warn "Failed to update package database"
+  if ! sudo pacman -Sy --noconfirm; then
+    warn "Failed to update package database"
+    return 1
+  fi
 }
 
 ensure_base_tools() {
@@ -82,19 +85,19 @@ ensure_yay() {
   # Clone and build yay-bin (faster than building from source)
   if ! git clone --depth 1 https://aur.archlinux.org/yay-bin.git; then
     error "Failed to clone yay-bin repository"
-    popd >/dev/null
+    popd >/dev/null || true
     return 1
   fi
 
   if ! cd yay-bin; then
     error "Failed to enter yay-bin directory"
-    popd >/dev/null
+    popd >/dev/null || true
     return 1
   fi
 
   if ! makepkg -si --noconfirm; then
     error "Failed to build and install yay"
-    popd >/dev/null
+    popd >/dev/null || true
     return 1
   fi
 

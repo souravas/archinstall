@@ -21,30 +21,54 @@ info "Setting up Docker..."
 # Install Docker packages if not already present
 if ! command -v docker >/dev/null 2>&1; then
 	info "Installing Docker packages..."
-	yay -S --noconfirm --needed docker docker-compose docker-buildx
+	if (( ${NO_ACT:-0} )); then
+		info "[dry-run] Would install: docker docker-compose docker-buildx"
+	else
+		yay -S --noconfirm --needed docker docker-compose docker-buildx
+	fi
 else
 	info "Docker already installed, ensuring all components are present..."
-	yay -S --noconfirm --needed docker docker-compose docker-buildx
+	if (( ${NO_ACT:-0} )); then
+		info "[dry-run] Would ensure installed: docker docker-compose docker-buildx"
+	else
+		yay -S --noconfirm --needed docker docker-compose docker-buildx
+	fi
 fi
 
 # Limit log size to avoid running out of disk
-sudo mkdir -p /etc/docker
-echo '{"log-driver":"json-file","log-opts":{"max-size":"10m","max-file":"5"}}' | sudo tee /etc/docker/daemon.json
+if (( ${NO_ACT:-0} )); then
+	info "[dry-run] Would configure Docker daemon.json for log rotation"
+else
+	sudo mkdir -p /etc/docker
+	echo '{"log-driver":"json-file","log-opts":{"max-size":"10m","max-file":"5"}}' | sudo tee /etc/docker/daemon.json >/dev/null
+fi
 
 # Start Docker automatically
-sudo systemctl enable docker
+if (( ${NO_ACT:-0} )); then
+	info "[dry-run] Would enable Docker service"
+else
+	sudo systemctl enable docker
+fi
 
 # Give this user privileged Docker access
-sudo usermod -aG docker ${USER}
+if (( ${NO_ACT:-0} )); then
+	info "[dry-run] Would add user ${USER} to docker group"
+else
+	sudo usermod -aG docker ${USER}
+fi
 
 # Prevent Docker from preventing boot for network-online.target
-sudo mkdir -p /etc/systemd/system/docker.service.d
-sudo tee /etc/systemd/system/docker.service.d/no-block-boot.conf <<'EOF'
+if (( ${NO_ACT:-0} )); then
+	info "[dry-run] Would configure Docker service to not block boot"
+else
+	sudo mkdir -p /etc/systemd/system/docker.service.d
+	sudo tee /etc/systemd/system/docker.service.d/no-block-boot.conf <<'EOF'
 [Unit]
 DefaultDependencies=no
 EOF
 
-sudo systemctl daemon-reload
+	sudo systemctl daemon-reload
+fi
 
 success "Docker setup complete. Docker will start automatically on next boot."
 success "You may need to log out/in for group membership to apply."

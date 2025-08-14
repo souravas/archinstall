@@ -35,10 +35,10 @@ ssh_setup() {
   # Ensure agent running and key added
   if ! pgrep -u "$USER" ssh-agent >/dev/null 2>&1; then
     info "Starting ssh-agent..."
-    eval "$(ssh-agent -s)"
+    eval "$(ssh-agent -s)" || warn "Failed to start ssh-agent"
   fi
 
-  if ssh-add -l 2>&1 | grep -q "${key_file}"; then
+  if ssh-add -l 2>/dev/null | grep -q "${key_file}" || ssh-add -l 2>/dev/null | grep -q "$(ssh-keygen -lf "${key_file}.pub" 2>/dev/null | awk '{print $2}')"; then
     info "Key already added to agent."
   else
     ssh-add "${key_file}" || warn "Failed to add key to agent"
