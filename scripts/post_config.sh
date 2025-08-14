@@ -280,5 +280,17 @@ EOF
     fi
   fi
 
+  # Open JetBrains Toolbox if installed
+  if command -v jetbrains-toolbox >/dev/null 2>&1; then
+    if (( NO_ACT )); then
+      info "[dry-run] Would open JetBrains Toolbox in background"
+    else
+      info "Opening JetBrains Toolbox in background..."
+      # Start JetBrains Toolbox in the background and detach from terminal
+      nohup jetbrains-toolbox >/dev/null 2>&1 & disown
+      info "JetBrains Toolbox opened. You can manually install PyCharm and other IDEs."
+    fi
+  fi
+
   success "Post-install configuration complete."
 }
