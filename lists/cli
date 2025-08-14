@@ -1,4 +1,4 @@
-# one package per line; lines starting with # are ignored
+# mixed repo + AUR packages for general CLI tooling
 git
 curl
 zoxide

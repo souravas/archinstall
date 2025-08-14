@@ -7,6 +7,13 @@ warn()    { printf "\033[1;33m[WARN]\033[0m %s\n" "$*"; }
 error()   { printf "\033[1;31m[ERR ]\033[0m %s\n" "$*" >&2; }
 success() { printf "\033[1;32m[DONE]\033[0m %s\n" "$*"; }
 
+# Global flags
+: "${NO_ACT:=0}"   # if set to 1, perform a dry-run (no installs)
+
+# Failure tracking
+FAILED_REPO_PKGS=()
+FAILED_AUR_PKGS=()
+
 require_arch() {
   if ! command -v pacman >/dev/null 2>&1; then
     error "This script is for Arch Linux. pacman not found."; exit 1
@@ -63,7 +70,14 @@ install_repo_pkg() {
     info "repo ✓  $pkg"
   else
     info "repo →  $pkg"
-    sudo pacman -S --needed --noconfirm "$pkg"
+    if (( NO_ACT )); then
+      echo "(dry-run) pacman -S --needed --noconfirm $pkg"
+    else
+      if ! sudo pacman -S --needed --noconfirm "$pkg"; then
+        FAILED_REPO_PKGS+=("$pkg")
+        error "Failed repo install: $pkg"
+      fi
+    fi
   fi
 }
 
@@ -73,6 +87,13 @@ install_aur_pkg() {
     info "AUR  ✓  $pkg"
   else
     info "AUR  →  $pkg"
-    yay -S --needed --noconfirm "$pkg"
+    if (( NO_ACT )); then
+      echo "(dry-run) yay -S --needed --noconfirm $pkg"
+    else
+      if ! yay -S --needed --noconfirm "$pkg"; then
+        FAILED_AUR_PKGS+=("$pkg")
+        error "Failed AUR install: $pkg"
+      fi
+    fi
   fi
 }

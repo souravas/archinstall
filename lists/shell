@@ -1,0 +1,7 @@
+# mixed repo + AUR packages for shell environment
+zsh
+starship
+zsh-autosuggestions
+zsh-syntax-highlighting
+lazydocker
+tlrc

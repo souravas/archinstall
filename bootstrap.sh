@@ -2,6 +2,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+NO_ACT=0
+for arg in "$@"; do
+	case "$arg" in
+		--dry-run|-n) NO_ACT=1; shift ;;
+		*) ;; # ignore unknown for now
+	esac
+done
+
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 source "${SCRIPT_DIR}/scripts/lib.sh"
 source "${SCRIPT_DIR}/scripts/install_from_lists.sh"
@@ -13,8 +21,21 @@ pacman_tune
 ensure_base_tools
 ensure_yay
 
-# Install from lists (repo vs AUR kept separate for speed and clarity)
+# Install from unified lists (auto-detect repo vs AUR per package)
 install_from_lists "${SCRIPT_DIR}/lists"
+
+# Print failure summary (if any)
+if (( NO_ACT )); then
+	info "Dry-run complete (no changes made)."
+else
+	if (( ${#FAILED_REPO_PKGS[@]} > 0 || ${#FAILED_AUR_PKGS[@]} > 0 )); then
+		warn "Some packages failed to install:"
+		(( ${#FAILED_REPO_PKGS[@]} )) && warn "  Repo: ${FAILED_REPO_PKGS[*]}"
+		(( ${#FAILED_AUR_PKGS[@]} )) && warn "  AUR : ${FAILED_AUR_PKGS[*]}"
+	else
+		success "All package installs succeeded."
+	fi
+fi
 
 # Run post-install user configs (zsh, starship, ghostty, git, etc.)
 post_config

@@ -2,35 +2,32 @@
 #!/usr/bin/env bash
 
 install_from_list_file() {
-  local installer="$1"   # install_repo_pkg | install_aur_pkg
-  local file="$2"
+  local file="$1"
   [[ -f "$file" ]] || return 0
-
   while IFS= read -r line || [[ -n "$line" ]]; do
-    # strip comments + trim
-    line="${line%%#*}"; line="${line#"${line%%[![:space:]]*}"}"; line="${line%"${line##*[![:space:]]}"}"
+    line="${line%%#*}"; line="${line#"${line%%[![:space:]]*}"}"; line="${line%"${line##*[![:space:]]}"}";
     [[ -z "$line" ]] && continue
-    "$installer" "$line"
+    # Fast path: if it's an official repo pkg, use pacman directly (faster, no AUR metadata)
+    if pacman -Si -- "$line" &>/dev/null; then
+      install_repo_pkg "$line"
+    else
+      install_aur_pkg "$line"  # falls back to yay (handles both build + bin AUR)
+    fi
   done < "$file"
 }
 
 install_from_lists() {
   local dir="$1"
-
-  info "Installing packages listed under ${dir}"
+  if (( NO_ACT )); then
+    info "[dry-run] Resolving packages from unified lists in ${dir} (mixed repo + AUR)"
+  else
+    info "Installing packages from unified lists in ${dir} (mixed repo + AUR)"
+  fi
   shopt -s nullglob
-
-  # Repo lists (*.pacman)
-  for f in "${dir}"/*.pacman; do
-    info "Processing repo list: $(basename "$f")"
-    install_from_list_file install_repo_pkg "$f"
+  for f in "${dir}"/*; do
+    [[ -f "$f" ]] || continue
+    info "Processing list: $(basename "$f")"
+    install_from_list_file "$f"
   done
-
-  # AUR lists (*.aur)
-  for f in "${dir}"/*.aur; do
-    info "Processing AUR list: $(basename "$f")"
-    install_from_list_file install_aur_pkg "$f"
-  done
-
   shopt -u nullglob
 }
