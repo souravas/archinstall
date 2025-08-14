@@ -29,15 +29,12 @@ setup_mise() {
   info "Setting up mise..."
 
   # Add mise to shell if not already done
-  if ! grep -q 'mise activate' ~/.bashrc 2>/dev/null && ! grep -q 'mise activate' ~/.zshrc 2>/dev/null; then
-    if [[ -n "$ZSH_VERSION" ]] && [[ -f ~/.zshrc ]]; then
+  if ! grep -q 'mise activate' ~/.zshrc 2>/dev/null; then
+    if [[ -f ~/.zshrc ]]; then
       echo 'eval "$(mise activate zsh)"' >> ~/.zshrc
       info "Added mise activation to ~/.zshrc"
-    elif [[ -f ~/.bashrc ]]; then
-      echo 'eval "$(mise activate bash)"' >> ~/.bashrc
-      info "Added mise activation to ~/.bashrc"
     fi
-    warn "You may need to restart your shell or run 'source ~/.bashrc' or 'source ~/.zshrc'"
+    warn "You may need to restart your shell or run 'source ~/.zshrc'"
   fi
 }
 
@@ -49,7 +46,7 @@ install_node() {
 
   # Source mise activation for current session
   if command -v mise >/dev/null 2>&1; then
-    eval "$(mise activate bash)" 2>/dev/null || true
+    eval "$(mise activate zsh)" 2>/dev/null || true
   fi
 
   # Install Node.js LTS

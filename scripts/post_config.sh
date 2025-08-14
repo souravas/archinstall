@@ -174,13 +174,10 @@ EOF
         warn "dev_env.sh not found; setting up mise manually..."
 
         # Fallback manual setup
-        if ! grep -q 'mise activate' ~/.bashrc 2>/dev/null && ! grep -q 'mise activate' ~/.zshrc 2>/dev/null; then
-          if [[ -n "$ZSH_VERSION" ]] && [[ -f ~/.zshrc ]]; then
+        if ! grep -q 'mise activate' ~/.zshrc 2>/dev/null; then
+          if [[ -f ~/.zshrc ]]; then
             echo 'eval "$(mise activate zsh)"' >> ~/.zshrc
             info "Added mise activation to ~/.zshrc"
-          elif [[ -f ~/.bashrc ]]; then
-            echo 'eval "$(mise activate bash)"' >> ~/.bashrc
-            info "Added mise activation to ~/.bashrc"
           fi
         fi
 
