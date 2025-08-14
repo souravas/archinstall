@@ -3,7 +3,7 @@
 # This file contains all custom aliases that can be sourced by .zshrc
 
 # System
-alias u='sudo ~/.scripts/update.sh'
+alias update='sudo ~/.scripts/update.sh'
 
 # File system
 alias ls='eza -lh --group-directories-first --icons'
@@ -52,5 +52,3 @@ alias ytda='yt-dlp -f bestaudio -x --audio-format mp3 --audio-quality 0'
 # Compression
 alias decompress="tar -xzf"
 
-# Custom Directory
-alias cdd='cd /mnt/c/Users/soura/Downloads'
