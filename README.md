@@ -54,7 +54,46 @@ Preview actions without installing:
 ```
 bash bootstrap.sh --dry-run
 ```
-Shows which pacman vs yay commands would run and performs detection only.
+
+### Dry-run & Advanced Options
+Preview actions without installing:
+```
+bash bootstrap.sh --dry-run
+```
+
+Advanced usage options:
+```bash
+# Normal installation
+./bootstrap.sh
+
+# Dry run to see what would be done
+./bootstrap.sh --dry-run
+
+# Verbose output for debugging
+./bootstrap.sh --verbose
+
+# Dry run with verbose output
+./bootstrap.sh --dry-run --verbose
+
+# Show help
+./bootstrap.sh --help
+```
+
+### Development Environment Setup
+The bootstrap automatically sets up a Node.js development environment using `mise` (instead of nvm). After installation:
+
+- **Node.js LTS** is installed via `mise`
+- **mise** is configured for your shell
+- **Python** is available from the system (with `uv` for package management)
+
+You can also manually setup development environments:
+```bash
+# Install/reinstall Node.js LTS
+./scripts/dev_env.sh node
+
+# Or just run dev_env.sh (defaults to node)
+./scripts/dev_env.sh
+```
 
 ## What gets configured
 - **Ghostty** config at `~/.config/ghostty/config` (catppuccin-mocha, dark, 0.9 opacity)
@@ -63,3 +102,14 @@ Shows which pacman vs yay commands would run and performs detection only.
 - Your **.zshrc** (from this repo) copied to `~` (existing one is backed up)
 - **Git** globals (name, email, editor)
 - **Fonts** are refreshed with `fc-cache -fv`
+- **Node.js LTS** via `mise` for development
+- **Development tools** including VS Code, Neovim, and various CLI tools
+
+## Key Features
+
+1. **Safety**: Added dry-run validation and environment checks
+2. **Debugging**: Verbose mode for troubleshooting
+3. **Reliability**: Better error handling and recovery
+4. **User Experience**: Clear progress phases and better messaging
+5. **Maintainability**: Cleaner code structure and documentation
+6. **Modern tooling**: Uses `mise` instead of `nvm` for better Node.js management

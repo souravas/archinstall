@@ -159,22 +159,41 @@ EOF
     cp "${CFG_DIR}/zsh/webapp.zsh"    "${HOME}/.config/zsh/webapp.zsh"    2>/dev/null || warn "webapp.zsh not found"
   fi
 
-  # Setup NVM and install latest Node.js
-  if command -v nvm >/dev/null 2>&1; then
+  # Setup mise and install Node.js LTS
+  if command -v mise >/dev/null 2>&1; then
     if (( NO_ACT )); then
-      info "[dry-run] Would install & use latest LTS Node.js via nvm"
+      info "[dry-run] Would setup mise and install Node.js LTS via dev_env.sh"
     else
-      info "Setting up NVM and installing latest Node.js..."
-      export NVM_DIR="$HOME/.nvm"
-      [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-      [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
-      nvm install --lts
-      nvm use --lts
-      nvm alias default node
-      info "Node.js $(node --version) installed via NVM"
+      info "Setting up development environment..."
+
+      # Run the dev_env.sh script for Node.js setup
+      if [[ -f "${SCRIPT_DIR}/dev_env.sh" ]]; then
+        bash "${SCRIPT_DIR}/dev_env.sh" node || warn "Failed to setup Node.js via dev_env.sh"
+      else
+        warn "dev_env.sh not found; setting up mise manually..."
+
+        # Fallback manual setup
+        if ! grep -q 'mise activate' ~/.bashrc 2>/dev/null && ! grep -q 'mise activate' ~/.zshrc 2>/dev/null; then
+          if [[ -n "$ZSH_VERSION" ]] && [[ -f ~/.zshrc ]]; then
+            echo 'eval "$(mise activate zsh)"' >> ~/.zshrc
+            info "Added mise activation to ~/.zshrc"
+          elif [[ -f ~/.bashrc ]]; then
+            echo 'eval "$(mise activate bash)"' >> ~/.bashrc
+            info "Added mise activation to ~/.bashrc"
+          fi
+        fi
+
+        # Install Node.js LTS globally
+        mise use --global node@lts || warn "Failed to install Node.js via mise"
+
+        # Try to show version if installation succeeded
+        if mise exec node@lts -- node --version 2>/dev/null; then
+          info "Node.js $(mise exec node@lts -- node --version) installed via mise"
+        fi
+      fi
     fi
   else
-    warn "nvm not found; skipping Node.js installation"
+    warn "mise not found; skipping Node.js installation"
   fi
 
   # Copy update script
