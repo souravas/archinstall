@@ -14,7 +14,7 @@ yay -Syu --noconfirm
 
 # Update tldr database
 echo "📖 Updating tldr database..."
-tldr -u
+tldr --update
 
 # Clean orphaned packages (only if any exist)
 echo "🧹 Cleaning orphaned packages..."

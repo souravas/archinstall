@@ -203,6 +203,18 @@ EOF
     fi
   fi
 
+  # Update tldr database (tealdeer)
+  if command -v tldr >/dev/null 2>&1; then
+    if (( NO_ACT )); then
+      info "[dry-run] Would update tldr database"
+    else
+      info "Updating tldr database..."
+      tldr --update || warn "Failed to update tldr database"
+    fi
+  else
+    warn "tldr not found; skipping database update"
+  fi
+
   # Enable fstrim timer for SSD maintenance
   if (( NO_ACT )); then
     info "[dry-run] Would enable fstrim.timer"
