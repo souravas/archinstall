@@ -132,24 +132,6 @@ post_config() {
     if [[ -n "$zshrc_source" ]]; then
       cp "$zshrc_source" "${HOME}/.zshrc"
       info "Copied .zshrc from $zshrc_source"
-    else
-      warn ".zshrc not found in expected locations, creating basic one"
-      cat > "${HOME}/.zshrc" << 'EOF'
-# Basic zsh configuration
-export ZSH="$HOME/.oh-my-zsh"
-ZSH_THEME="robbyrussell"
-plugins=(git)
-source $ZSH/oh-my-zsh.sh
-
-# Load custom configurations if they exist
-[[ -f ~/.config/zsh/omz.zsh ]] && source ~/.config/zsh/omz.zsh
-[[ -f ~/.config/zsh/aliases.zsh ]] && source ~/.config/zsh/aliases.zsh
-[[ -f ~/.config/zsh/functions.zsh ]] && source ~/.config/zsh/functions.zsh
-[[ -f ~/.config/zsh/webapp.zsh ]] && source ~/.config/zsh/webapp.zsh
-
-# Initialize starship if available
-command -v starship >/dev/null && eval "$(starship init zsh)"
-EOF
     fi
 
     info "Setting up zsh config files..."
@@ -160,38 +142,18 @@ EOF
     cp "${CFG_DIR}/zsh/webapp.zsh"    "${HOME}/.config/zsh/webapp.zsh"    2>/dev/null || warn "webapp.zsh not found"
   fi
 
-  # Setup mise and install Node.js LTS
-  if command -v mise >/dev/null 2>&1; then
+  # Install Node.js using nvm
+  if command -v nvm >/dev/null 2>&1; then
     if (( NO_ACT )); then
-      info "[dry-run] Would setup mise and install Node.js LTS via dev_env.sh"
+      info "[dry-run] Would install Node.js LTS using nvm"
     else
-      info "Setting up development environment..."
-
-      # Run the dev_env.sh script for Node.js setup
-      if [[ -f "${SCRIPT_DIR}/scripts/dev_env.sh" ]]; then
-        bash "${SCRIPT_DIR}/scripts/dev_env.sh" node || warn "Failed to setup Node.js via dev_env.sh"
-      else
-        warn "dev_env.sh not found; setting up mise manually..."
-
-        # Fallback manual setup
-        if ! grep -q 'mise activate' ~/.zshrc 2>/dev/null; then
-          if [[ -f ~/.zshrc ]]; then
-            echo 'eval "$(mise activate zsh)"' >> ~/.zshrc
-            info "Added mise activation to ~/.zshrc"
-          fi
-        fi
-
-        # Install Node.js LTS globally
-        mise use --global node@lts || warn "Failed to install Node.js via mise"
-
-        # Try to show version if installation succeeded
-        if mise exec node@lts -- node --version 2>/dev/null; then
-          info "Node.js $(mise exec node@lts -- node --version) installed via mise"
-        fi
-      fi
+      info "Installing Node.js LTS using nvm..."
+      # Source nvm to ensure it's available in this script
+      source /usr/share/nvm/init-nvm.sh || true
+      nvm install node || warn "Failed to install Node.js via nvm"
     fi
   else
-    warn "mise not found; skipping Node.js installation"
+    warn "nvm not found; skipping Node.js installation"
   fi
 
   # Copy update script

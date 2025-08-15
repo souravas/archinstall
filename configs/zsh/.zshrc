@@ -16,6 +16,7 @@ fortune | cowsay -f stegosaurus | lolcat
 # Init Scripts
 eval "$(starship init zsh)"
 eval "$(zoxide init zsh)"
+source /usr/share/nvm/init-nvm.sh
 
 # Set vs code as default
 export VISUAL="code --wait"

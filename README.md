@@ -80,19 +80,22 @@ Advanced usage options:
 ```
 
 ### Development Environment Setup
-The bootstrap automatically sets up a Node.js development environment using `mise` (instead of nvm). After installation:
+The bootstrap automatically sets up a Node.js development environment using `nvm`. After installation:
 
-- **Node.js LTS** is installed via `mise`
-- **mise** is configured for your shell
+- **Node.js LTS** is installed via `nvm`
+- **nvm** is configured for your shell and initialized in `.zshrc`
 - **Python** is available from the system (with `uv` for package management)
 
-You can also manually setup development environments:
+Node.js can be managed using nvm commands:
 ```bash
-# Install/reinstall Node.js LTS
-./scripts/dev_env.sh node
+# Use the installed Node.js version
+nvm use node
 
-# Or just run dev_env.sh (defaults to node)
-./scripts/dev_env.sh
+# Install a specific version
+nvm install 18.20.0
+
+# List installed versions
+nvm list
 ```
 
 ## What gets configured
@@ -102,7 +105,7 @@ You can also manually setup development environments:
 - Your **.zshrc** (from this repo) copied to `~` (existing one is backed up)
 - **Git** globals (name, email, editor)
 - **Fonts** are refreshed with `fc-cache -fv`
-- **Node.js LTS** via `mise` for development
+- **Node.js LTS** via `nvm` for development
 - **Development tools** including VS Code, Neovim, and various CLI tools
 
 ## Key Features
@@ -112,4 +115,4 @@ You can also manually setup development environments:
 3. **Reliability**: Better error handling and recovery
 4. **User Experience**: Clear progress phases and better messaging
 5. **Maintainability**: Cleaner code structure and documentation
-6. **Modern tooling**: Uses `mise` instead of `nvm` for better Node.js management
+6. **Modern tooling**: Uses `nvm` for Node.js version management
