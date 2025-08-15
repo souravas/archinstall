@@ -142,18 +142,27 @@ post_config() {
     cp "${CFG_DIR}/zsh/webapp.zsh"    "${HOME}/.config/zsh/webapp.zsh"    2>/dev/null || warn "webapp.zsh not found"
   fi
 
-  # Install Node.js using nvm
-  if command -v nvm >/dev/null 2>&1; then
-    if (( NO_ACT )); then
-      info "[dry-run] Would install Node.js LTS using nvm"
-    else
-      info "Installing Node.js LTS using nvm..."
-      # Source nvm to ensure it's available in this script
-      source /usr/share/nvm/init-nvm.sh || true
-      nvm install node || warn "Failed to install Node.js via nvm"
-    fi
+  # Install Node.js using nvm (after zsh config is set up)
+  if (( NO_ACT )); then
+    info "[dry-run] Would install Node.js LTS using nvm"
   else
-    warn "nvm not found; skipping Node.js installation"
+    info "Installing Node.js LTS using nvm..."
+    # Check if nvm package is installed
+    if pacman -Qs nvm >/dev/null 2>&1; then
+      # Source nvm initialization script directly
+      if [[ -f "/usr/share/nvm/init-nvm.sh" ]]; then
+        source /usr/share/nvm/init-nvm.sh
+        if command -v nvm >/dev/null 2>&1; then
+          nvm install node || warn "Failed to install Node.js via nvm"
+        else
+          warn "nvm function not available after sourcing init script"
+        fi
+      else
+        warn "nvm init script not found at /usr/share/nvm/init-nvm.sh"
+      fi
+    else
+      warn "nvm package not installed; skipping Node.js installation"
+    fi
   fi
 
   # Copy update script
